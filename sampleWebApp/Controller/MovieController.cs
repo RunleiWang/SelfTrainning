@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -7,14 +8,14 @@ using Newtonsoft.Json;
 
 namespace sampleWebApp
 {
-    public class movieController : Controller
+    public class MovieController : Controller
     {
-        private List<Movie> _movie = new List<Movie>
+        private readonly List<Movie> _movie = new List<Movie>
         {
             new Movie{Id = 1,Name = "Disney", Country = "FR", Description = "Cartoon", Cast = new Cast{CastKey = 1, CastCountry = "CN", CastName = "Lei Wang"}},
             new Movie{Id = 2,Name = "Marvel", Country = "US", Description = "Action", Cast = new Cast{CastKey = 1, CastCountry = "CN", CastName = "RunLei Wang"}},
             new Movie{Id = 3,Name = "Youth", Country = "CN", Description = "Romantic", Cast = new Cast{CastKey = 1, CastCountry = "CN", CastName = "Xia Liu"}},
-            new Movie{Id = 4,Name = "Youth", Country = "CN", Description = "Romantic", Cast = new Cast{CastKey = 1, CastCountry = "CN", CastName = "Xia Liu"}}
+            new Movie{Id = 4,Name = "Love", Country = "IR", Description = "Romantic", Cast = new Cast{CastKey = 1, CastCountry = "CN", CastName = "Run wang"}}
         };
         
         [HttpPost("/About")]
@@ -22,7 +23,8 @@ namespace sampleWebApp
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);  //bad request
+                throw new Exception("oops,error");
+                //return BadRequest(ModelState);  //bad request              
             }
             return Json(movieFromBody);
         }
@@ -40,14 +42,20 @@ namespace sampleWebApp
         }
         
         [HttpGet("/home")]
-        public IActionResult getMovies(int id)
+        public IActionResult getMovies()
         {
+            var request = Request;
+            request.HttpContext.Response.Headers.Add("My-Headers","my-headers");
             var nameArray = new Dictionary<int, string>();           
             foreach (var movie in _movie)
             {
                 nameArray.Add(movie.Id, movie.Name);
             }           
             var jsonResponse = JsonConvert.SerializeObject(nameArray);
+            if (!ModelState.IsValid)
+            {
+                throw new Exception("oops,error");
+            }
             return Ok(jsonResponse);  
         }
                
@@ -55,11 +63,11 @@ namespace sampleWebApp
         public ActionResult movieDetail(int id)
         {                  
             var request = Request;
-            request.HttpContext.Response.Headers.Add("Content-Type","application/json");
+            request.HttpContext.Response.Headers.Add("My-Headers","my-headers");
             var response = new HttpResponseMessage(HttpStatusCode.OK);
             if (response.IsSuccessStatusCode)
             {
-                return Json(request.Headers);  //get headers
+                //return Json(request.Headers);  //get headers
             }
             if (id > 2)
             {
