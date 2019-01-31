@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -21,10 +22,26 @@ namespace sampleWebApp.Test
         [Fact]
         public void should_create_object_using_delegate_registration()
         {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient(_ => new IndependentType());
+            ServiceProvider provider = serviceCollection.BuildServiceProvider();
+
+            var instance = provider.GetService<IndependentType>();
             
+            Assert.Same(typeof(IndependentType), instance.GetType());;                        
         }
 
+        [Fact]
+        public void should_return_null_create_an_object_is_not_in_get_service()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddTransient(_ => new IndependentType());
+            ServiceProvider provider = serviceCollection.BuildServiceProvider();
 
+            var instance = provider.GetService<WithDependency>();
+            
+            Assert.Null(instance);;
+        }
 
         [Fact]
         public void should_create_object_using_type_registration()
@@ -39,8 +56,7 @@ namespace sampleWebApp.Test
             
             Assert.Same(typeof(IndependentType), instance.GetType());
         }
-
-
+      
         [Fact]
         public void should_create_new_instance_per_call_for_transient_scope()
         {
